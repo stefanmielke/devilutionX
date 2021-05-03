@@ -40,7 +40,7 @@ bool VR2;
 /** Specifies whether to generate a vertical room at position 3 in the Cathedral. */
 bool VR3;
 /** Contains the contents of the single player quest DUN file. */
-std::unique_ptr<BYTE[]> L5pSetPiece;
+std::unique_ptr<uint16_t[]> L5pSetPiece;
 
 /** Contains shadows for 2x2 blocks of base tile IDs in the Cathedral. */
 const ShadowStruct SPATS[37] = {
@@ -1120,15 +1120,15 @@ static void DRLG_LoadL1SP()
 {
 	L5setloadflag = false;
 	if (QuestStatus(Q_BUTCHER)) {
-		L5pSetPiece = LoadFileInMem("Levels\\L1Data\\rnd6.DUN");
+		L5pSetPiece = LoadFileInMem<uint16_t>("Levels\\L1Data\\rnd6.DUN");
 		L5setloadflag = true;
 	}
 	if (QuestStatus(Q_SKELKING) && !gbIsMultiplayer) {
-		L5pSetPiece = LoadFileInMem("Levels\\L1Data\\SKngDO.DUN");
+		L5pSetPiece = LoadFileInMem<uint16_t>("Levels\\L1Data\\SKngDO.DUN");
 		L5setloadflag = true;
 	}
 	if (QuestStatus(Q_LTBANNER)) {
-		L5pSetPiece = LoadFileInMem("Levels\\L1Data\\Banner2.DUN");
+		L5pSetPiece = LoadFileInMem<uint16_t>("Levels\\L1Data\\Banner2.DUN");
 		L5setloadflag = true;
 	}
 }
@@ -1207,96 +1207,93 @@ static void DRLG_InitL1Vals()
 	}
 }
 
-void LoadL1Dungeon(const char *sFileName, int vx, int vy)
+void LoadL1Dungeon(const char *path, int vx, int vy)
 {
-	int i, j, rw, rh;
-	BYTE *lm;
-
 	dminx = 16;
 	dminy = 16;
 	dmaxx = 96;
 	dmaxy = 96;
 
 	DRLG_InitTrans();
-	auto pLevelMap = LoadFileInMem(sFileName);
 
-	for (j = 0; j < DMAXY; j++) {
-		for (i = 0; i < DMAXX; i++) {
+	for (int j = 0; j < DMAXY; j++) {
+		for (int i = 0; i < DMAXX; i++) {
 			dungeon[i][j] = 22;
 			L5dflags[i][j] = 0;
 		}
 	}
 
-	lm = pLevelMap.get();
-	rw = *lm;
-	lm += 2;
-	rh = *lm;
-	lm += 2;
+	auto dunData = LoadFileInMem<uint16_t>(path);
 
-	for (j = 0; j < rh; j++) {
-		for (i = 0; i < rw; i++) {
-			if (*lm != 0) {
-				dungeon[i][j] = *lm;
+	int width = SDL_SwapLE16(dunData[0]);
+	int height = SDL_SwapLE16(dunData[1]);
+
+	uint16_t *tileLayer = &dunData[2];
+
+	for (int j = 0; j < height; j++) {
+		for (int i = 0; i < width; i++) {
+			uint8_t tileId = SDL_SwapLE16(tileLayer[j * width + i]);
+			if (tileId != 0) {
+				dungeon[i][j] = tileId;
 				L5dflags[i][j] |= DLRG_PROTECTED;
 			} else {
 				dungeon[i][j] = 13;
 			}
-			lm += 2;
 		}
 	}
 
 	DRLG_L1Floor();
+
 	ViewX = vx;
 	ViewY = vy;
+
 	DRLG_L1Pass3();
 	DRLG_Init_Globals();
+
 	if (currlevel < 17)
 		DRLG_InitL1Vals();
-	SetMapMonsters(pLevelMap.get(), 0, 0);
-	SetMapObjects(pLevelMap.get(), 0, 0);
+
+	SetMapMonsters(dunData.get(), 0, 0);
+	SetMapObjects(dunData.get(), 0, 0);
 }
 
-void LoadPreL1Dungeon(const char *sFileName)
+void LoadPreL1Dungeon(const char *path)
 {
-	int i, j, rw, rh;
-	BYTE *lm;
+	for (int j = 0; j < DMAXY; j++) {
+		for (int i = 0; i < DMAXX; i++) {
+			dungeon[i][j] = 22;
+			L5dflags[i][j] = 0;
+		}
+	}
+
+	auto dunData = LoadFileInMem<uint16_t>(path);
+
+	int width = SDL_SwapLE16(dunData[0]);
+	int height = SDL_SwapLE16(dunData[1]);
 
 	dminx = 16;
 	dminy = 16;
 	dmaxx = 96;
 	dmaxy = 96;
 
-	auto pLevelMap = LoadFileInMem(sFileName);
+	uint16_t *tileLayer = &dunData[2];
 
-	for (j = 0; j < DMAXY; j++) {
-		for (i = 0; i < DMAXX; i++) {
-			dungeon[i][j] = 22;
-			L5dflags[i][j] = 0;
-		}
-	}
-
-	lm = pLevelMap.get();
-	rw = *lm;
-	lm += 2;
-	rh = *lm;
-	lm += 2;
-
-	for (j = 0; j < rh; j++) {
-		for (i = 0; i < rw; i++) {
-			if (*lm != 0) {
-				dungeon[i][j] = *lm;
+	for (int j = 0; j < height; j++) {
+		for (int i = 0; i < width; i++) {
+			uint8_t tileId = SDL_SwapLE16(tileLayer[j * width + i]);
+			if (tileId != 0) {
+				dungeon[i][j] = tileId;
 				L5dflags[i][j] |= DLRG_PROTECTED;
 			} else {
 				dungeon[i][j] = 13;
 			}
-			lm += 2;
 		}
 	}
 
 	DRLG_L1Floor();
 
-	for (j = 0; j < DMAXY; j++) {
-		for (i = 0; i < DMAXX; i++) {
+	for (int j = 0; j < DMAXY; j++) {
+		for (int i = 0; i < DMAXX; i++) {
 			pdungeon[i][j] = dungeon[i][j];
 		}
 	}
@@ -2038,28 +2035,25 @@ static void DRLG_L5Subs()
 
 static void DRLG_L5SetRoom(int rx1, int ry1)
 {
-	int rw, rh, i, j;
-	BYTE *sp;
-
-	rw = L5pSetPiece[0];
-	rh = L5pSetPiece[2];
+	int width = SDL_SwapLE16(L5pSetPiece[0]);
+	int height = SDL_SwapLE16(L5pSetPiece[1]);
 
 	setpc_x = rx1;
 	setpc_y = ry1;
-	setpc_w = rw;
-	setpc_h = rh;
+	setpc_w = width;
+	setpc_h = height;
 
-	sp = &L5pSetPiece[4];
+	uint16_t *tileLayer = &L5pSetPiece[2];
 
-	for (j = 0; j < rh; j++) {
-		for (i = 0; i < rw; i++) {
-			if (*sp) {
-				dungeon[rx1 + i][ry1 + j] = *sp;
+	for (int j = 0; j < height; j++) {
+		for (int i = 0; i < width; i++) {
+			uint8_t tileId = SDL_SwapLE16(tileLayer[j * width + i]);
+			if (tileId != 0) {
+				dungeon[rx1 + i][ry1 + j] = tileId;
 				L5dflags[rx1 + i][ry1 + j] |= DLRG_PROTECTED;
 			} else {
 				dungeon[rx1 + i][ry1 + j] = 13;
 			}
-			sp += 2;
 		}
 	}
 }
