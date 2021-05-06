@@ -621,7 +621,7 @@ void InvMove(AxisDirection dir)
 		if (isHoldingItem) {
 			if (slot >= SLOTXY_INV_FIRST && slot <= SLOTXY_INV_LAST) {
                 if (slot == SLOTXY_INV_ROW1_FIRST || slot == SLOTXY_INV_ROW2_FIRST || slot == SLOTXY_INV_ROW3_FIRST || slot == SLOTXY_INV_ROW4_FIRST) {
-					slot += 10 - icursW28;
+					slot += INV_ROW_SLOT_SIZE - icursW28;
 				} else {
 					slot -= 1;
 				}
@@ -656,7 +656,7 @@ void InvMove(AxisDirection dir)
 				mousePos = InvGetInvSlotCoord(INVLOC_RING_LEFT);
 			} else if (slot >= SLOTXY_INV_FIRST && slot <= SLOTXY_INV_LAST) {
 				if (slot == SLOTXY_INV_ROW1_FIRST || slot == SLOTXY_INV_ROW2_FIRST || slot == SLOTXY_INV_ROW3_FIRST || slot == SLOTXY_INV_ROW4_FIRST) {
-					slot += 9;
+					slot += INV_ROW_SLOT_SIZE - 1;
 				} else {
 					slot -= 1;
 				}
@@ -673,7 +673,7 @@ void InvMove(AxisDirection dir)
                     slot == SLOTXY_INV_ROW1_LAST + 1 - icursW28 || slot == SLOTXY_INV_ROW2_LAST + 1 - icursW28 ||
 				    slot == SLOTXY_INV_ROW3_LAST + 1 - icursW28 || slot == SLOTXY_INV_ROW4_LAST + 1 - icursW28
                 ) {
-					slot -= 10 - icursW28;
+					slot -= INV_ROW_SLOT_SIZE - icursW28;
 				} else {
 					slot += 1;
 				}
@@ -708,7 +708,7 @@ void InvMove(AxisDirection dir)
 				mousePos = InvGetInvSlotCoord(INVLOC_AMULET);
 			} else if (slot >= SLOTXY_INV_FIRST && slot <= SLOTXY_INV_LAST) {
 				if (slot == SLOTXY_INV_ROW1_LAST || slot == SLOTXY_INV_ROW2_LAST || slot == SLOTXY_INV_ROW3_LAST || slot == SLOTXY_INV_ROW4_LAST) {
-					slot -= 9;
+					slot -= INV_ROW_SLOT_SIZE - 1;
 				} else {
 					slot += 1;
 				}
@@ -722,11 +722,11 @@ void InvMove(AxisDirection dir)
 	if (dir.y == AxisDirectionY_UP) {
 		if (isHoldingItem) {
 			if (slot >= SLOTXY_INV_ROW2_FIRST) { // general inventory
-				slot -= 10;
+				slot -= INV_ROW_SLOT_SIZE;
                 mousePos = InvGetSlotCoord(slot);
 			} else if (slot >= SLOTXY_INV_FIRST) {
 				if (plr[myplr].HoldItem._itype == ITYPE_RING) {
-					if (slot >= SLOTXY_INV_ROW1_FIRST && slot <= SLOTXY_INV_ROW1_FIRST + 5) {
+					if (slot >= SLOTXY_INV_ROW1_FIRST && slot <= SLOTXY_INV_ROW1_FIRST + (INV_ROW_SLOT_SIZE / 2) - 1) {
                         slot = SLOTXY_RING_LEFT;
                         mousePos = InvGetInvSlotCoord(INVLOC_RING_LEFT);
                     } else {
@@ -772,8 +772,8 @@ void InvMove(AxisDirection dir)
 			} else if (slot == SLOTXY_HAND_RIGHT_FIRST) {
                 slot = SLOTXY_AMULET;
 				mousePos = InvGetInvSlotCoord(INVLOC_AMULET);
-			} else if (slot >= SLOTXY_INV_ROW2_FIRST) { // general inventory
-				slot -= 10;
+			} else if (slot >= SLOTXY_INV_ROW2_FIRST) {
+				slot -= INV_ROW_SLOT_SIZE;
                 mousePos = InvGetSlotCoord(slot);
 			}
 		}
@@ -788,11 +788,11 @@ void InvMove(AxisDirection dir)
 			} else if (slot == SLOTXY_RING_RIGHT || slot == SLOTXY_HAND_RIGHT_FIRST || slot == SLOTXY_AMULET) {
                 slot = SLOTXY_INV_ROW1_LAST - 1;
                 mousePos = InvGetSlotCoord(slot);
-			} else if (slot <= (SLOTXY_INV_ROW3_LAST)) { // general inventory
-				slot += 10;
+			} else if (slot <= (SLOTXY_INV_ROW3_LAST)) {
+				slot += INV_ROW_SLOT_SIZE;
                 mousePos = InvGetSlotCoord(slot);
-			} else if (slot <= (SLOTXY_BELT_LAST - 10) && plr[myplr].HoldItem._itype == ITYPE_MISC && icursW28 == 1 && icursH28 == 1) { // forcing only 1x1 misc items
-				slot += 10;
+			} else if (slot <= (SLOTXY_BELT_LAST - INV_ROW_SLOT_SIZE) && plr[myplr].HoldItem._itype == ITYPE_MISC && icursW28 == 1 && icursH28 == 1) { // forcing only 1x1 misc items
+				slot += INV_ROW_SLOT_SIZE;
                 mousePos = BeltGetSlotCoord(slot);
 			} else if (slot >= SLOTXY_INV_LAST - 1 && slot <= SLOTXY_INV_LAST && plr[myplr].HoldItem._itype == ITYPE_MISC && icursW28 == 1 && icursH28 == 1) { // slots 9 and 10 should go to belt 8
                 slot = SLOTXY_BELT_LAST;
@@ -803,7 +803,7 @@ void InvMove(AxisDirection dir)
                 slot = SLOTXY_CHEST_FIRST;
 				mousePos = InvGetInvSlotCoord(INVLOC_CHEST);
 			} else if (slot == SLOTXY_CHEST_FIRST) {
-                slot = SLOTXY_INV_ROW1_FIRST + 5;
+                slot = SLOTXY_INV_ROW1_FIRST + (INV_ROW_SLOT_SIZE / 2);
                 mousePos = InvGetSlotCoord(slot);
 			} else if (slot == SLOTXY_HAND_LEFT_FIRST) {
                 slot = SLOTXY_RING_LEFT;
@@ -821,10 +821,10 @@ void InvMove(AxisDirection dir)
                 slot = SLOTXY_RING_RIGHT;
 				mousePos = InvGetInvSlotCoord(INVLOC_RING_RIGHT);
 			} else if (slot <= (SLOTXY_INV_ROW3_LAST)) {
-				slot += 10;
+				slot += INV_ROW_SLOT_SIZE;
                 mousePos = InvGetSlotCoord(slot);
-			} else if (slot <= (SLOTXY_BELT_LAST - 10)) {
-				slot += 10;
+			} else if (slot <= (SLOTXY_BELT_LAST - INV_ROW_SLOT_SIZE)) {
+				slot += INV_ROW_SLOT_SIZE;
                 mousePos = BeltGetSlotCoord(slot);
 			} else if (slot >= SLOTXY_INV_LAST - 1 && slot <= SLOTXY_INV_LAST) { // slots 9 and 10 should go to belt 8
 			    slot = SLOTXY_BELT_LAST;
